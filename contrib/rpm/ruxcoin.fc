@@ -1,0 +1,8 @@
+/usr/bin/ruxcoin-cli		--	gen_context(system_u:object_r:ruxcoin_exec_t,s0)
+/usr/sbin/ruxcoind		--	gen_context(system_u:object_r:ruxcoin_exec_t,s0)
+/usr/lib(64)?/ruxcoin/ruxcoind		--	gen_context(system_u:object_r:ruxcoin_exec_t,s0)
+
+/etc/ruxcoin(/.*)?		gen_context(system_u:object_r:ruxcoin_conf_t,s0)
+/var/lib/ruxcoin(/.*)?		gen_context(system_u:object_r:ruxcoin_var_lib_t,s0)
+
+(/var)?/run/ruxcoind(/.*)?   gen_context(system_u:object_r:ruxcoin_var_run_t,s0)

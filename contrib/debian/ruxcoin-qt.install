@@ -1,0 +1,6 @@
+usr/local/bin/ruxcoin-qt usr/bin
+share/pixmaps/ruxcoin32.xpm usr/share/pixmaps
+share/pixmaps/ruxcoin16.xpm usr/share/pixmaps
+share/pixmaps/ruxcoin128.png usr/share/pixmaps
+debian/ruxcoin-qt.desktop usr/share/applications
+debian/ruxcoin-qt.protocol usr/share/kde4/services/

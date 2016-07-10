@@ -1,0 +1,33 @@
+# /etc/conf.d/ruxcoind: config file for /etc/init.d/ruxcoind
+
+# Config file location
+#RUXCOIND_CONFIGFILE="/etc/ruxcoin/ruxcoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $RUXCOIND_USER)
+#RUXCOIND_PIDDIR="/var/run/ruxcoind"
+
+# What filename to give the pidfile
+#RUXCOIND_PIDFILE="${RUXCOIND_PIDDIR}/ruxcoind.pid"
+
+# Where to write ruxcoind data (be mindful that the blockchain is large)
+#RUXCOIND_DATADIR="/var/lib/ruxcoind"
+
+# User and group to own ruxcoind process
+#RUXCOIND_USER="ruxcoin"
+#RUXCOIND_GROUP="ruxcoin"
+
+# Path to ruxcoind executable
+#RUXCOIND_BIN="/usr/bin/ruxcoind"
+
+# Nice value to run ruxcoind under
+#RUXCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+RUXCOIND_OPTS="-disablewallet"
+
+# The timeout in seconds OpenRC will wait for ruxcoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+RUXCOIND_SIGTERM_TIMEOUT=60

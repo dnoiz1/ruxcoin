@@ -1,0 +1,11 @@
+[Protocol]
+exec=ruxcoin-qt '%u'
+protocol=ruxcoin
+input=none
+output=none
+helper=true
+listing=
+reading=false
+writing=false
+makedir=false
+deleting=false

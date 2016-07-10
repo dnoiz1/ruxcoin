@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Ruxcoin
+Comment=Ruxcoin P2P Cryptocurrency
+Comment[fr]=Ruxcoin, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Ruxcoin, eşten eşe kriptografik sanal para birimi
+Exec=ruxcoin-qt %u
+Terminal=false
+Type=Application
+Icon=ruxcoin128
+MimeType=x-scheme-handler/ruxcoin;
+Categories=Office;Finance;
