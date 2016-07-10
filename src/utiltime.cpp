@@ -1,10 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
+// Copyright (c) 2009-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include "config/ruxcoin-config.h"
 #endif
 
 #include "utiltime.h"
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-static int64_t nMockTime = 0;  //! For unit testing
+static int64_t nMockTime = 0; //!< For unit testing
 
 int64_t GetTime()
 {

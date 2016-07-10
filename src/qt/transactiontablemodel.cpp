@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -243,7 +243,7 @@ TransactionTableModel::TransactionTableModel(const PlatformStyle *platformStyle,
         fProcessingQueuedTransactions(false),
         platformStyle(platformStyle)
 {
-    columns << QString() << QString() << tr("Date") << tr("Type") << tr("Label") << BitcoinUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
+    columns << QString() << QString() << tr("Date") << tr("Type") << tr("Label") << RuxcoinUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
     priv->refreshWallet();
 
     connect(walletModel->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
@@ -260,7 +260,7 @@ TransactionTableModel::~TransactionTableModel()
 /** Updates the column title to "Amount (DisplayUnit)" and emits headerDataChanged() signal for table headers to react. */
 void TransactionTableModel::updateAmountColumnTitle()
 {
-    columns[Amount] = BitcoinUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
+    columns[Amount] = RuxcoinUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
     Q_EMIT headerDataChanged(Qt::Horizontal,Amount,Amount);
 }
 
@@ -311,6 +311,9 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord *wtx) cons
         break;
     case TransactionStatus::Unconfirmed:
         status = tr("Unconfirmed");
+        break;
+    case TransactionStatus::Abandoned:
+        status = tr("Abandoned");
         break;
     case TransactionStatus::Confirming:
         status = tr("Confirming (%1 of %2 recommended confirmations)").arg(wtx->status.depth).arg(TransactionRecord::RecommendedNumConfirmations);
@@ -444,9 +447,9 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord *wtx) const
     return QVariant();
 }
 
-QString TransactionTableModel::formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed, BitcoinUnits::SeparatorStyle separators) const
+QString TransactionTableModel::formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed, RuxcoinUnits::SeparatorStyle separators) const
 {
-    QString str = BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), wtx->credit + wtx->debit, false, separators);
+    QString str = RuxcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), wtx->credit + wtx->debit, false, separators);
     if(showUnconfirmed)
     {
         if(!wtx->status.countsForBalance)
@@ -468,6 +471,8 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord *wtx)
         return COLOR_TX_STATUS_OFFLINE;
     case TransactionStatus::Unconfirmed:
         return QIcon(":/icons/transaction_0");
+    case TransactionStatus::Abandoned:
+        return QIcon(":/icons/transaction_abandoned");
     case TransactionStatus::Confirming:
         switch(wtx->status.depth)
         {
@@ -547,7 +552,7 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         case ToAddress:
             return formatTxToAddress(rec, false);
         case Amount:
-            return formatTxAmount(rec, true, BitcoinUnits::separatorAlways);
+            return formatTxAmount(rec, true, RuxcoinUnits::separatorAlways);
         }
         break;
     case Qt::EditRole:
@@ -573,6 +578,11 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole:
         return column_alignments[index.column()];
     case Qt::ForegroundRole:
+        // Use the "danger" color for abandoned transactions
+        if(rec->status.status == TransactionStatus::Abandoned)
+        {
+            return COLOR_TX_STATUS_DANGER;
+        }
         // Non-confirmed (but not immature) as transactions are grey
         if(!rec->status.countsForBalance && rec->status.status != TransactionStatus::Immature)
         {
@@ -609,11 +619,39 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         return QString::fromStdString(rec->hash.ToString());
     case TxHexRole:
         return priv->getTxHex(rec);
+    case TxPlainTextRole:
+        {
+            QString details;
+            QDateTime date = QDateTime::fromTime_t(static_cast<uint>(rec->time));
+            QString txLabel = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(rec->address));
+
+            details.append(date.toString("M/d/yy HH:mm"));
+            details.append(" ");
+            details.append(formatTxStatus(rec));
+            details.append(". ");
+            if(!formatTxType(rec).isEmpty()) {
+                details.append(formatTxType(rec));
+                details.append(" ");
+            }
+            if(!rec->address.empty()) {
+                if(txLabel.isEmpty())
+                    details.append(tr("(no label)") + " ");
+                else {
+                    details.append("(");
+                    details.append(txLabel);
+                    details.append(") ");
+                }
+                details.append(QString::fromStdString(rec->address));
+                details.append(" ");
+            }
+            details.append(formatTxAmount(rec, false, RuxcoinUnits::separatorNever));
+            return details;
+        }
     case ConfirmedRole:
         return rec->status.countsForBalance;
     case FormattedAmountRole:
         // Used for copy/export, so don't include separators
-        return formatTxAmount(rec, false, BitcoinUnits::separatorNever);
+        return formatTxAmount(rec, false, RuxcoinUnits::separatorNever);
     case StatusRole:
         return rec->status.status;
     }

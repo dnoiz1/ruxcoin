@@ -1,11 +1,11 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "guiutil.h"
 
-#include "bitcoinaddressvalidator.h"
-#include "bitcoinunits.h"
+#include "ruxcoinaddressvalidator.h"
+#include "ruxcoinunits.h"
 #include "qvalidatedlineedit.h"
 #include "walletmodel.h"
 
@@ -107,6 +107,23 @@ QFont fixedPitchFont()
 #endif
 }
 
+// Just some dummy data to generate an convincing random-looking (but consistent) address
+static const uint8_t dummydata[] = {0xeb,0x15,0x23,0x1d,0xfc,0xeb,0x60,0x92,0x58,0x86,0xb6,0x7d,0x06,0x52,0x99,0x92,0x59,0x15,0xae,0xb1,0x72,0xc0,0x66,0x47};
+
+// Generate a dummy address with invalid CRC, starting with the network prefix.
+static std::string DummyAddress(const CChainParams &params)
+{
+    std::vector<unsigned char> sourcedata = params.Base58Prefix(CChainParams::PUBKEY_ADDRESS);
+    sourcedata.insert(sourcedata.end(), dummydata, dummydata + sizeof(dummydata));
+    for(int i=0; i<256; ++i) { // Try every trailing byte
+        std::string s = EncodeBase58(begin_ptr(sourcedata), end_ptr(sourcedata));
+        if (!CRuxcoinAddress(s).IsValid())
+            return s;
+        sourcedata[sourcedata.size()-1] += 1;
+    }
+    return "";
+}
+
 void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 {
     parent->setFocusProxy(widget);
@@ -115,10 +132,11 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a Bitcoin address (e.g. %1)").arg("1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L"));
+    widget->setPlaceholderText(QObject::tr("Enter a Ruxcoin address (e.g. %1)").arg(
+        QString::fromStdString(DummyAddress(Params()))));
 #endif
-    widget->setValidator(new BitcoinAddressEntryValidator(parent));
-    widget->setCheckValidator(new BitcoinAddressCheckValidator(parent));
+    widget->setValidator(new RuxcoinAddressEntryValidator(parent));
+    widget->setCheckValidator(new RuxcoinAddressCheckValidator(parent));
 }
 
 void setupAmountWidget(QLineEdit *widget, QWidget *parent)
@@ -130,10 +148,10 @@ void setupAmountWidget(QLineEdit *widget, QWidget *parent)
     widget->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 }
 
-bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
+bool parseRuxcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no bitcoin: URI
-    if(!uri.isValid() || uri.scheme() != QString("bitcoin"))
+    // return if URI is not valid or is no ruxcoin: URI
+    if(!uri.isValid() || uri.scheme() != QString("ruxcoin"))
         return false;
 
     SendCoinsRecipient rv;
@@ -173,7 +191,7 @@ bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!BitcoinUnits::parse(BitcoinUnits::BTC, i->second, &rv.amount))
+                if(!RuxcoinUnits::parse(RuxcoinUnits::RUX, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -191,28 +209,28 @@ bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
     return true;
 }
 
-bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
+bool parseRuxcoinURI(QString uri, SendCoinsRecipient *out)
 {
-    // Convert bitcoin:// to bitcoin:
+    // Convert ruxcoin:// to ruxcoin:
     //
-    //    Cannot handle this later, because bitcoin:// will cause Qt to see the part after // as host,
+    //    Cannot handle this later, because ruxcoin:// will cause Qt to see the part after // as host,
     //    which will lower-case it (and thus invalidate the address).
-    if(uri.startsWith("bitcoin://", Qt::CaseInsensitive))
+    if(uri.startsWith("ruxcoin://", Qt::CaseInsensitive))
     {
-        uri.replace(0, 10, "bitcoin:");
+        uri.replace(0, 10, "ruxcoin:");
     }
     QUrl uriInstance(uri);
-    return parseBitcoinURI(uriInstance, out);
+    return parseRuxcoinURI(uriInstance, out);
 }
 
-QString formatBitcoinURI(const SendCoinsRecipient &info)
+QString formatRuxcoinURI(const SendCoinsRecipient &info)
 {
-    QString ret = QString("bitcoin:%1").arg(info.address);
+    QString ret = QString("ruxcoin:%1").arg(info.address);
     int paramCount = 0;
 
     if (info.amount)
     {
-        ret += QString("?amount=%1").arg(BitcoinUnits::format(BitcoinUnits::BTC, info.amount, false, BitcoinUnits::separatorNever));
+        ret += QString("?amount=%1").arg(RuxcoinUnits::format(RuxcoinUnits::RUX, info.amount, false, RuxcoinUnits::separatorNever));
         paramCount++;
     }
 
@@ -225,7 +243,7 @@ QString formatBitcoinURI(const SendCoinsRecipient &info)
 
     if (!info.message.isEmpty())
     {
-        QString msg(QUrl::toPercentEncoding(info.message));;
+        QString msg(QUrl::toPercentEncoding(info.message));
         ret += QString("%1message=%2").arg(paramCount == 0 ? "?" : "&").arg(msg);
         paramCount++;
     }
@@ -235,7 +253,7 @@ QString formatBitcoinURI(const SendCoinsRecipient &info)
 
 bool isDust(const QString& address, const CAmount& amount)
 {
-    CTxDestination dest = CBitcoinAddress(address.toStdString()).Get();
+    CTxDestination dest = CRuxcoinAddress(address.toStdString()).Get();
     CScript script = GetScriptForDestination(dest);
     CTxOut txOut(amount, script);
     return txOut.IsDust(::minRelayTxFee);
@@ -591,15 +609,15 @@ boost::filesystem::path static StartupShortcutPath()
 {
     std::string chain = ChainNameFromCommandLine();
     if (chain == CBaseChainParams::MAIN)
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "Bitcoin.lnk";
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Ruxcoin.lnk";
     if (chain == CBaseChainParams::TESTNET) // Remove this special case when CBaseChainParams::TESTNET = "testnet4"
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "Bitcoin (testnet).lnk";
-    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Bitcoin (%s).lnk", chain);
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Ruxcoin (testnet).lnk";
+    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Ruxcoin (%s).lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
 {
-    // check for Bitcoin*.lnk
+    // check for Ruxcoin*.lnk
     return boost::filesystem::exists(StartupShortcutPath());
 }
 
@@ -691,8 +709,8 @@ boost::filesystem::path static GetAutostartFilePath()
 {
     std::string chain = ChainNameFromCommandLine();
     if (chain == CBaseChainParams::MAIN)
-        return GetAutostartDir() / "bitcoin.desktop";
-    return GetAutostartDir() / strprintf("bitcoin-%s.lnk", chain);
+        return GetAutostartDir() / "ruxcoin.desktop";
+    return GetAutostartDir() / strprintf("ruxcoin-%s.lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
@@ -731,13 +749,13 @@ bool SetStartOnSystemStartup(bool fAutoStart)
         if (!optionFile.good())
             return false;
         std::string chain = ChainNameFromCommandLine();
-        // Write a bitcoin.desktop file to the autostart directory:
+        // Write a ruxcoin.desktop file to the autostart directory:
         optionFile << "[Desktop Entry]\n";
         optionFile << "Type=Application\n";
         if (chain == CBaseChainParams::MAIN)
-            optionFile << "Name=Bitcoin\n";
+            optionFile << "Name=Ruxcoin\n";
         else
-            optionFile << strprintf("Name=Bitcoin (%s)\n", chain);
+            optionFile << strprintf("Name=Ruxcoin (%s)\n", chain);
         optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", GetBoolArg("-testnet", false), GetBoolArg("-regtest", false));
         optionFile << "Terminal=false\n";
         optionFile << "Hidden=false\n";
@@ -756,7 +774,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
 LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef findUrl);
 LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef findUrl)
 {
-    // loop through the list of startup items and try to find the bitcoin app
+    // loop through the list of startup items and try to find the ruxcoin app
     CFArrayRef listSnapshot = LSSharedFileListCopySnapshot(list, NULL);
     for(int i = 0; i < CFArrayGetCount(listSnapshot); i++) {
         LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(listSnapshot, i);
@@ -788,21 +806,21 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
 
 bool GetStartOnSystemStartup()
 {
-    CFURLRef bitcoinAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFURLRef ruxcoinAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, bitcoinAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, ruxcoinAppUrl);
     return !!foundItem; // return boolified object
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
-    CFURLRef bitcoinAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFURLRef ruxcoinAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, bitcoinAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, ruxcoinAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add bitcoin app to startup item list
-        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, NULL, NULL, bitcoinAppUrl, NULL, NULL);
+        // add ruxcoin app to startup item list
+        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, NULL, NULL, ruxcoinAppUrl, NULL, NULL);
     }
     else if(!fAutoStart && foundItem) {
         // remove item
@@ -908,6 +926,9 @@ QString formatServicesStr(quint64 mask)
                 break;
             case NODE_BLOOM:
                 strList.append("BLOOM");
+                break;
+            case NODE_WITNESS:
+                strList.append("WITNESS");
                 break;
             default:
                 strList.append(QString("%1[%2]").arg("UNKNOWN").arg(check));

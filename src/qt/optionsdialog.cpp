@@ -1,15 +1,15 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include "config/ruxcoin-config.h"
 #endif
 
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
 
-#include "bitcoinunits.h"
+#include "ruxcoinunits.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
 
@@ -78,6 +78,11 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
 
     /* Display elements init */
     QDir translations(":translations");
+
+    ui->ruxcoinAtStartup->setToolTip(ui->ruxcoinAtStartup->toolTip().arg(tr(PACKAGE_NAME)));
+    ui->ruxcoinAtStartup->setText(ui->ruxcoinAtStartup->text().arg(tr(PACKAGE_NAME)));
+
+    ui->lang->setToolTip(ui->lang->toolTip().arg(tr(PACKAGE_NAME)));
     ui->lang->addItem(QString("(") + tr("default") + QString(")"), QVariant(""));
     Q_FOREACH(const QString &langStr, translations.entryList())
     {
@@ -109,7 +114,7 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     ui->thirdPartyTxUrls->setPlaceholderText("https://example.com/tx/%s");
 #endif
 
-    ui->unit->setModel(new BitcoinUnits(this));
+    ui->unit->setModel(new RuxcoinUnits(this));
 
     /* Widget-to-option mapper */
     mapper = new QDataWidgetMapper(this);
@@ -171,7 +176,7 @@ void OptionsDialog::setModel(OptionsModel *model)
 void OptionsDialog::setMapper()
 {
     /* Main */
-    mapper->addMapping(ui->bitcoinAtStartup, OptionsModel::StartAtStartup);
+    mapper->addMapping(ui->ruxcoinAtStartup, OptionsModel::StartAtStartup);
     mapper->addMapping(ui->threadsScriptVerif, OptionsModel::ThreadsScriptVerif);
     mapper->addMapping(ui->databaseCache, OptionsModel::DatabaseCache);
 
@@ -193,6 +198,7 @@ void OptionsDialog::setMapper()
 
     /* Window */
 #ifndef Q_OS_MAC
+    mapper->addMapping(ui->hideTrayIcon, OptionsModel::HideTrayIcon);
     mapper->addMapping(ui->minimizeToTray, OptionsModel::MinimizeToTray);
     mapper->addMapping(ui->minimizeOnClose, OptionsModel::MinimizeOnClose);
 #endif
@@ -236,6 +242,19 @@ void OptionsDialog::on_okButton_clicked()
 void OptionsDialog::on_cancelButton_clicked()
 {
     reject();
+}
+
+void OptionsDialog::on_hideTrayIcon_stateChanged(int fState)
+{
+    if(fState)
+    {
+        ui->minimizeToTray->setChecked(false);
+        ui->minimizeToTray->setEnabled(false);
+    }
+    else
+    {
+        ui->minimizeToTray->setEnabled(true);
+    }
 }
 
 void OptionsDialog::showRestartWarning(bool fPersistent)

@@ -1,8 +1,25 @@
-// Copyright (c) 2016 The Bitcoin Core developers
+// Copyright (c) 2016 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "versionbits.h"
+
+#include "consensus/params.h"
+
+const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_BITS_DEPLOYMENTS] = {
+    {
+        /*.name =*/ "testdummy",
+        /*.gbt_force =*/ true,
+    },
+    {
+        /*.name =*/ "csv",
+        /*.gbt_force =*/ true,
+    },
+    {
+        /*.name =*/ "segwit",
+        /*.gbt_force =*/ false,
+    }
+};
 
 ThresholdState AbstractThresholdConditionChecker::GetStateFor(const CBlockIndex* pindexPrev, const Consensus::Params& params, ThresholdConditionCache& cache) const
 {
@@ -25,7 +42,7 @@ ThresholdState AbstractThresholdConditionChecker::GetStateFor(const CBlockIndex*
             break;
         }
         if (pindexPrev->GetMedianTimePast() < nTimeStart) {
-            // Optimizaton: don't recompute down further, as we know every earlier block will be before the start time
+            // Optimization: don't recompute down further, as we know every earlier block will be before the start time
             cache[pindexPrev] = THRESHOLD_DEFINED;
             break;
         }

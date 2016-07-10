@@ -1,9 +1,9 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_OPTIONSMODEL_H
-#define BITCOIN_QT_OPTIONSMODEL_H
+#ifndef RUXCOIN_QT_OPTIONSMODEL_H
+#define RUXCOIN_QT_OPTIONSMODEL_H
 
 #include "amount.h"
 
@@ -13,7 +13,7 @@ QT_BEGIN_NAMESPACE
 class QNetworkProxy;
 QT_END_NAMESPACE
 
-/** Interface from Qt to configuration data structure for Bitcoin client.
+/** Interface from Qt to configuration data structure for Ruxcoin client.
    To Qt, the options are presented as a list with the different options
    laid out vertically.
    This can be changed to a tree once the settings become sufficiently
@@ -28,6 +28,7 @@ public:
 
     enum OptionID {
         StartAtStartup,         // bool
+        HideTrayIcon,           // bool
         MinimizeToTray,         // bool
         MapPortUPnP,            // bool
         MinimizeOnClose,        // bool
@@ -37,7 +38,7 @@ public:
         ProxyUseTor,            // bool
         ProxyIPTor,             // QString
         ProxyPortTor,           // int
-        DisplayUnit,            // BitcoinUnits::Unit
+        DisplayUnit,            // RuxcoinUnits::Unit
         ThirdPartyTxUrls,       // QString
         Language,               // QString
         CoinControlFeatures,    // bool
@@ -58,6 +59,7 @@ public:
     void setDisplayUnit(const QVariant &value);
 
     /* Explicit getters */
+    bool getHideTrayIcon() { return fHideTrayIcon; }
     bool getMinimizeToTray() { return fMinimizeToTray; }
     bool getMinimizeOnClose() { return fMinimizeOnClose; }
     int getDisplayUnit() { return nDisplayUnit; }
@@ -72,6 +74,7 @@ public:
 
 private:
     /* Qt-only settings */
+    bool fHideTrayIcon;
     bool fMinimizeToTray;
     bool fMinimizeOnClose;
     QString language;
@@ -87,6 +90,7 @@ private:
 Q_SIGNALS:
     void displayUnitChanged(int unit);
     void coinControlFeaturesChanged(bool);
+    void hideTrayIconChanged(bool);
 };
 
-#endif // BITCOIN_QT_OPTIONSMODEL_H
+#endif // RUXCOIN_QT_OPTIONSMODEL_H

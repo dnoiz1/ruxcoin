@@ -1,13 +1,13 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Bitcoin
+Upstream-Name: Ruxcoin
 Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
- irc://#bitcoin@freenode.net
-Source: https://github.com/bitcoin/bitcoin
+ irc://#ruxcoin@freenode.net
+Source: https://github.com/ruxcoin/ruxcoin
 
 Files: *
-Copyright: 2009-2016, Bitcoin Core Developers
+Copyright: 2009-2016, Ruxcoin Core Developers
 License: Expat
-Comment: The Bitcoin Core Developers encompasses the current developers listed on bitcoin.org,
+Comment: The Ruxcoin Core Developers encompasses the current developers listed on ruxcoin.org,
          as well as the numerous contributors to the project.
 
 Files: debian/*
@@ -21,6 +21,7 @@ License: GPL-3+
 
 Files: src/qt/res/icons/add.png
        src/qt/res/icons/address-book.png
+       src/qt/res/icons/chevron.png
        src/qt/res/icons/configure.png
        src/qt/res/icons/debugwindow.png
        src/qt/res/icons/edit.png
@@ -56,6 +57,8 @@ Comment: Inspired by Stephan Hutchings Typicons
 
 Files: src/qt/res/icons/tx_mined.png
        src/qt/res/src/mine.svg
+       src/qt/res/icons/fontbigger.png
+       src/qt/res/icons/fontsmaller.png
 Copyright: Jonas Schnelli
 License: Expat
 Comment:
@@ -72,12 +75,12 @@ License: Expat
 Comment: Modifications of Stephan Hutchings Typicons
 
 Files: src/qt/res/icons/about.png
-       src/qt/res/icons/bitcoin.*
-       share/pixmaps/bitcoin*
-       src/qt/res/src/bitcoin.svg
+       src/qt/res/icons/ruxcoin.*
+       share/pixmaps/ruxcoin*
+       src/qt/res/src/ruxcoin.svg
 Copyright: Bitboy, Jonas Schnelli
 License: public-domain
-Comment: Site: https://bitcointalk.org/?topic=1756.0
+Comment: Site: https://ruxcointalk.org/?topic=1756.0
 
 
 License: Expat

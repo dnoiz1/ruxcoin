@@ -1,146 +1,121 @@
-Bitcoin Core version 0.12.1 is now available from:
+(note: this is a temporary file, to be added-to by anybody, and moved to
+release-notes at release time)
 
-  <https://bitcoin.org/bin/bitcoin-core-0.12.1/>
+Ruxcoin Core version *version* is now available from:
 
-This is a new minor version release, including the BIP9, BIP68 and BIP112
-softfork, various bugfixes and updated translations.
+  <https://ruxcoin.org/bin/ruxcoin-core-*version*/>
+
+This is a new major version release, including new features, various bugfixes
+and performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at github:
 
-  <https://github.com/bitcoin/bitcoin/issues>
+  <https://github.com/ruxcoin/ruxcoin/issues>
 
-Upgrading and downgrading
-=========================
+To receive security and update notifications, please subscribe to:
 
-How to Upgrade
---------------
+  <https://ruxcoincore.org/en/list/announcements/join/>
 
-If you are running an older version, shut it down. Wait until it has completely
-shut down (which might take a few minutes for older versions), then run the
-installer (on Windows) or just copy over /Applications/Bitcoin-Qt (on Mac) or
-bitcoind/bitcoin-qt (on Linux).
+Compatibility
+==============
 
-Downgrade warning
------------------
+Microsoft ended support for Windows XP on [April 8th, 2014](https://www.microsoft.com/en-us/WindowsForBusiness/end-of-xp-support),
+an OS initially released in 2001. This means that not even critical security
+updates will be released anymore. Without security updates, using a ruxcoin
+wallet on a XP machine is irresponsible at least.
 
-### Downgrade to a version < 0.12.0
+In addition to that, with 0.12.x there have been varied reports of Ruxcoin Core
+randomly crashing on Windows XP. It is [not clear](https://github.com/ruxcoin/ruxcoin/issues/7681#issuecomment-217439891)
+what the source of these crashes is, but it is likely that upstream
+libraries such as Qt are no longer being tested on XP.
 
-Because release 0.12.0 and later will obfuscate the chainstate on every
-fresh sync or reindex, the chainstate is not backwards-compatible with
-pre-0.12 versions of Bitcoin Core or other software.
+We do not have time nor resources to provide support for an OS that is
+end-of-life. From 0.13.0 on, Windows XP is no longer supported. Users are
+suggested to upgrade to a newer verion of Windows, or install an alternative OS
+that is supported.
 
-If you want to downgrade after you have done a reindex with 0.12.0 or later,
-you will need to reindex when you first start Bitcoin Core version 0.11 or
-earlier.
+No attempt is made to prevent installing or running the software on Windows XP,
+you can still do so at your own risk, but do not expect it to work: do not
+report issues about Windows XP to the issue tracker.
 
 Notable changes
 ===============
 
-First version bits BIP9 softfork deployment
--------------------------------------------
+Database cache memory increased
+--------------------------------
 
-This release includes a soft fork deployment to enforce [BIP68][],
-[BIP112][] and [BIP113][] using the [BIP9][] deployment mechanism.
+As a result of growth of the UTXO set, performance with the prior default
+database cache of 100 MiB has suffered.
+For this reason the default was changed to 300 MiB in this release.
 
-The deployment sets the block version number to 0x20000001 between
-midnight 1st May 2016 and midnight 1st May 2017 to signal readiness for 
-deployment. The version number consists of 0x20000000 to indicate version
-bits together with setting bit 0 to indicate support for this combined
-deployment, shown as "csv" in the `getblockchaininfo` RPC call.
+For nodes on low-memory systems, the database cache can be changed back to
+100 MiB (or to another value) by either:
 
-For more information about the soft forking change, please see
-<https://github.com/bitcoin/bitcoin/pull/7648>
+- Adding `dbcache=100` in ruxcoin.conf
+- Changing it in the GUI under `Options → Size of database cache`
 
-This specific backport pull-request can be viewed at
-<https://github.com/bitcoin/bitcoin/pull/7543>
+Note that the database cache setting has the most performance impact
+during initial sync of a node, and when catching up after downtime.
 
-[BIP9]: https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki
-[BIP68]: https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki
-[BIP112]: https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki
-[BIP113]: https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki
+ruxcoin-cli: arguments privacy
+--------------------------------
 
-BIP68 soft fork to enforce sequence locks for relative locktime
----------------------------------------------------------------
+The RPC command line client gained a new argument, `-stdin`
+to read extra arguments from standard input, one per line until EOF/Ctrl-D.
+For example:
 
-[BIP68][] introduces relative lock-time consensus-enforced semantics of
-the sequence number field to enable a signed transaction input to remain
-invalid for a defined period of time after confirmation of its corresponding
-outpoint.
+    $ echo -e "mysecretcode\n120" | src/ruxcoin-cli -stdin walletpassphrase
 
-For more information about the implementation, see
-<https://github.com/bitcoin/bitcoin/pull/7184>
+It is recommended to use this for sensitive information such as wallet
+passphrases, as command-line arguments can usually be read from the process
+table by any user on the system.
 
-BIP112 soft fork to enforce OP_CHECKSEQUENCEVERIFY
---------------------------------------------------
+RPC low-level changes
+----------------------
 
-[BIP112][] redefines the existing OP_NOP3 as OP_CHECKSEQUENCEVERIFY (CSV)
-for a new opcode in the Bitcoin scripting system that in combination with
-[BIP68][] allows execution pathways of a script to be restricted based
-on the age of the output being spent.
+- `gettxoutsetinfo` UTXO hash (`hash_serialized`) has changed. There was a divergence between
+  32-bit and 64-bit platforms, and the txids were missing in the hashed data. This has been
+  fixed, but this means that the output will be different than from previous versions.
 
-For more information about the implementation, see
-<https://github.com/bitcoin/bitcoin/pull/7524>
+- Full UTF-8 support in the RPC API. Non-ASCII characters in, for example,
+  wallet labels have always been malformed because they weren't taken into account
+  properly in JSON RPC processing. This is no longer the case. This also affects
+  the GUI debug console.
 
-BIP113 locktime enforcement soft fork
--------------------------------------
+C++11 and Python 3
+-------------------
 
-Bitcoin Core 0.11.2 previously introduced mempool-only locktime
-enforcement using GetMedianTimePast(). This release seeks to
-consensus enforce the rule.
+Various code modernizations have been done. The Ruxcoin Core code base has
+started using C++11. This means that a C++11-capable compiler is now needed for
+building. Effectively this means GCC 4.7 or higher, or Clang 3.3 or higher.
 
-Bitcoin transactions currently may specify a locktime indicating when
-they may be added to a valid block.  Current consensus rules require
-that blocks have a block header time greater than the locktime specified
-in any transaction in that block.
+When cross-compiling for a target that doesn't have C++11 libraries, configure with
+`./configure --enable-glibc-back-compat ... LDFLAGS=-static-libstdc++`.
 
-Miners get to choose what time they use for their header time, with the
-consensus rule being that no node will accept a block whose time is more
-than two hours in the future.  This creates a incentive for miners to
-set their header times to future values in order to include locktimed
-transactions which weren't supposed to be included for up to two more
-hours.
+For running the functional tests in `qa/rpc-tests`, Python3.4 or higher is now
+required.
 
-The consensus rules also specify that valid blocks may have a header
-time greater than that of the median of the 11 previous blocks.  This
-GetMedianTimePast() time has a key feature we generally associate with
-time: it can't go backwards.
+Linux ARM builds
+------------------
 
-[BIP113][] specifies a soft fork enforced in this release that
-weakens this perverse incentive for individual miners to use a future
-time by requiring that valid blocks have a computed GetMedianTimePast()
-greater than the locktime specified in any transaction in that block.
+Due to popular request, Linux ARM builds have been added to the uploaded
+executables.
 
-Mempool inclusion rules currently require transactions to be valid for
-immediate inclusion in a block in order to be accepted into the mempool.
-This release begins applying the BIP113 rule to received transactions,
-so transaction whose time is greater than the GetMedianTimePast() will
-no longer be accepted into the mempool.
+The following extra files can be found in the download directory or torrent:
 
-**Implication for miners:** you will begin rejecting transactions that
-would not be valid under BIP113, which will prevent you from producing
-invalid blocks when BIP113 is enforced on the network. Any
-transactions which are valid under the current rules but not yet valid
-under the BIP113 rules will either be mined by other miners or delayed
-until they are valid under BIP113. Note, however, that time-based
-locktime transactions are more or less unseen on the network currently.
+- `ruxcoin-${VERSION}-arm-linux-gnueabihf.tar.gz`: Linux binaries for the most
+  common 32-bit ARM architecture.
+- `ruxcoin-${VERSION}-aarch64-linux-gnu.tar.gz`: Linux binaries for the most
+  common 64-bit ARM architecture.
 
-**Implication for users:** GetMedianTimePast() always trails behind the
-current time, so a transaction locktime set to the present time will be
-rejected by nodes running this release until the median time moves
-forward. To compensate, subtract one hour (3,600 seconds) from your
-locktimes to allow those transactions to be included in mempools at
-approximately the expected time.
+ARM builds are still experimental. If you have problems on a certain device or
+Linux distribution combination please report them on the bug tracker, it may be
+possible to resolve them.
 
-For more information about the implementation, see
-<https://github.com/bitcoin/bitcoin/pull/6566>
+Note that Android is not considered ARM Linux in this context. The executables
+are not expected to work out of the box on Android.
 
-Miscellaneous
--------------
-
-The p2p alert system is off by default. To turn on, use `-alert` with
-startup configuration.
-
-0.12.1 Change log
+0.13.0 Change log
 =================
 
 Detailed release notes follow. This overview includes changes that affect
@@ -148,51 +123,85 @@ behavior, not code moves, refactors and string updates. For convenience in locat
 the code changes and accompanying discussion, both the pull request and
 git merge commit are mentioned.
 
-### RPC and other APIs
-- #7739 `7ffc2bd` Add abandoned status to listtransactions (jonasschnelli)
+### RPC and REST
+
+Asm script outputs replacements for OP_NOP2 and OP_NOP3
+-------------------------------------------------------
+
+OP_NOP2 has been renamed to OP_CHECKLOCKTIMEVERIFY by [BIP 
+65](https://github.com/ruxcoin/bips/blob/master/bip-0065.mediawiki)
+
+OP_NOP3 has been renamed to OP_CHECKSEQUENCEVERIFY by [BIP 
+112](https://github.com/ruxcoin/bips/blob/master/bip-0112.mediawiki)
+
+The following outputs are affected by this change:
+- RPC `getrawtransaction` (in verbose mode)
+- RPC `decoderawtransaction`
+- RPC `decodescript`
+- REST `/rest/tx/` (JSON format)
+- REST `/rest/block/` (JSON format when including extended tx details)
+- `ruxcoin-tx -json`
+
+New mempool information RPC calls
+---------------------------------
+
+RPC calls have been added to output detailed statistics for individual mempool
+entries, as well as to calculate the in-mempool ancestors or descendants of a
+transaction: see `getmempoolentry`, `getmempoolancestors`, `getmempooldescendants`.
+
+### ZMQ
+
+Each ZMQ notification now contains an up-counting sequence number that allows
+listeners to detect lost notifications.
+The sequence number is always the last element in a multi-part ZMQ notification and
+therefore backward compatible.
+Each message type has its own counter.
+(https://github.com/ruxcoin/ruxcoin/pull/7762)
+
+### Configuration and command-line options
 
 ### Block and transaction handling
-- #7543 `834aaef` Backport BIP9, BIP68 and BIP112 with softfork (btcdrak)
 
 ### P2P protocol and network code
-- #7804 `90f1d24` Track block download times per individual block (sipa)
-- #7832 `4c3a00d` Reduce block timeout to 10 minutes (laanwj)
+
+The p2p alert system has been removed in #7692 and the 'alert' message is no longer supported.
+
+
+Fee filtering of invs (BIP 133)
+------------------------------------
+
+The optional new p2p message "feefilter" is implemented and the protocol
+version is bumped to 70013. Upon receiving a feefilter message from a peer,
+a node will not send invs for any transactions which do not meet the filter
+feerate. [BIP 133](https://github.com/ruxcoin/bips/blob/master/bip-0133.mediawiki)
 
 ### Validation
-- #7821 `4226aac` init: allow shutdown during 'Activating best chain...' (laanwj)
-- #7835 `46898e7` Version 2 transactions remain non-standard until CSV activates (sdaftuar)
 
 ### Build system
-- #7487 `00d57b4` Workaround Travis-side CI issues (luke-jr)
-- #7606 `a10da9a` No need to set -L and --location for curl (MarcoFalke)
-- #7614 `ca8f160` Add curl to packages (now needed for depends) (luke-jr)
-- #7776 `a784675` Remove unnecessary executables from gitian release (laanwj)
 
 ### Wallet
-- #7715 `19866c1` Fix calculation of balances and available coins. (morcos)
+
+Hierarchical Deterministic Key Generation
+-----------------------------------------
+Newly created wallets will use hierarchical deterministic key generation
+according to BIP32 (keypath m/0'/0'/k').
+Existing wallets will still use traditional key generation.
+
+Backups of HD wallets, regardless of when they have been created, can
+therefore be used to re-generate all possible private keys, even the
+ones which haven't already been generated during the time of the backup.
+
+HD key generation for new wallets can be disabled by `-usehd=0`. Keep in
+mind that this flag only has affect on newly created wallets.
+You can't disable HD key generation once you have created a HD wallet.
+
+There is no distinction between internal (change) and external keys.
+
+[Pull request](https://github.com/ruxcoin/ruxcoin/pull/8035/files), [BIP 32](https://github.com/ruxcoin/bips/blob/master/bip-0032.mediawiki)
+
+### GUI
+
+### Tests
 
 ### Miscellaneous
-- #7617 `f04f4fd` Fix markdown syntax and line terminate LogPrint (MarcoFalke)
-- #7747 `4d035bc` added depends cross compile info (accraze)
-- #7741 `a0cea89` Mark p2p alert system as deprecated (btcdrak)
-- #7780 `c5f94f6` Disable bad-chain alert (btcdrak)
-
-Credits
-=======
-
-Thanks to everyone who directly contributed to this release:
-
-- accraze
-- Alex Morcos
-- BtcDrak
-- Jonas Schnelli
-- Luke Dashjr
-- MarcoFalke
-- Mark Friedenbach
-- NicolasDorier
-- Pieter Wuille
-- Suhas Daftuar
-- Wladimir J. van der Laan
-
-As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).
 

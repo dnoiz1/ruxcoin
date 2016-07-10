@@ -1,14 +1,14 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include "config/ruxcoin-config.h"
 #endif
 
 #include "optionsmodel.h"
 
-#include "bitcoinunits.h"
+#include "ruxcoinunits.h"
 #include "guiutil.h"
 
 #include "amount.h"
@@ -51,9 +51,14 @@ void OptionsModel::Init(bool resetSettings)
     // These are Qt-only settings:
 
     // Window
+    if (!settings.contains("fHideTrayIcon"))
+        settings.setValue("fHideTrayIcon", false);
+    fHideTrayIcon = settings.value("fHideTrayIcon").toBool();
+    Q_EMIT hideTrayIconChanged(fHideTrayIcon);
+    
     if (!settings.contains("fMinimizeToTray"))
         settings.setValue("fMinimizeToTray", false);
-    fMinimizeToTray = settings.value("fMinimizeToTray").toBool();
+    fMinimizeToTray = settings.value("fMinimizeToTray").toBool() && !fHideTrayIcon;
 
     if (!settings.contains("fMinimizeOnClose"))
         settings.setValue("fMinimizeOnClose", false);
@@ -61,7 +66,7 @@ void OptionsModel::Init(bool resetSettings)
 
     // Display
     if (!settings.contains("nDisplayUnit"))
-        settings.setValue("nDisplayUnit", BitcoinUnits::BTC);
+        settings.setValue("nDisplayUnit", RuxcoinUnits::RUX);
     nDisplayUnit = settings.value("nDisplayUnit").toInt();
 
     if (!settings.contains("strThirdPartyTxUrls"))
@@ -166,6 +171,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
         {
         case StartAtStartup:
             return GUIUtil::GetStartOnSystemStartup();
+        case HideTrayIcon:
+            return fHideTrayIcon;
         case MinimizeToTray:
             return fMinimizeToTray;
         case MapPortUPnP:
@@ -241,6 +248,11 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         {
         case StartAtStartup:
             successful = GUIUtil::SetStartOnSystemStartup(value.toBool());
+            break;
+        case HideTrayIcon:
+            fHideTrayIcon = value.toBool();
+            settings.setValue("fHideTrayIcon", fHideTrayIcon);
+    		Q_EMIT hideTrayIconChanged(fHideTrayIcon);
             break;
         case MinimizeToTray:
             fMinimizeToTray = value.toBool();

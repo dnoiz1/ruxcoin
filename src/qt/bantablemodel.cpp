@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -103,7 +103,7 @@ int BanTableModel::rowCount(const QModelIndex &parent) const
 int BanTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return columns.length();;
+    return columns.length();
 }
 
 QVariant BanTableModel::data(const QModelIndex &index, int role) const

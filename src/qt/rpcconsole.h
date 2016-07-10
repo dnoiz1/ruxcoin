@@ -1,9 +1,9 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_RPCCONSOLE_H
-#define BITCOIN_QT_RPCCONSOLE_H
+#ifndef RUXCOIN_QT_RPCCONSOLE_H
+#define RUXCOIN_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"
@@ -11,6 +11,7 @@
 #include "net.h"
 
 #include <QWidget>
+#include <QCompleter>
 
 class ClientModel;
 class PlatformStyle;
@@ -25,7 +26,7 @@ class QMenu;
 class QItemSelection;
 QT_END_NAMESPACE
 
-/** Local Bitcoin RPC console. */
+/** Local Ruxcoin RPC console. */
 class RPCConsole: public QWidget
 {
     Q_OBJECT
@@ -77,13 +78,16 @@ private Q_SLOTS:
     void clearSelectedNode();
 
 public Q_SLOTS:
-    void clear();
+    void clear(bool clearHistory = true);
+    void fontBigger();
+    void fontSmaller();
+    void setFontSize(int newSize);
     /** Append the message to the message widget */
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
     /** Set number of blocks and last block date shown in the UI */
-    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);
+    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Set size (number of transactions and memory usage) of the mempool in the UI */
     void setMempoolSize(long numberOfTxs, size_t dynUsage);
     /** Go forward or back in history */
@@ -134,6 +138,8 @@ private:
     RPCTimerInterface *rpcTimerInterface;
     QMenu *peersTableContextMenu;
     QMenu *banTableContextMenu;
+    int consoleFontSize;
+    QCompleter *autoCompleter;
 };
 
-#endif // BITCOIN_QT_RPCCONSOLE_H
+#endif // RUXCOIN_QT_RPCCONSOLE_H

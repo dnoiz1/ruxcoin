@@ -1,9 +1,9 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_WALLETMODEL_H
-#define BITCOIN_QT_WALLETMODEL_H
+#ifndef RUXCOIN_QT_WALLETMODEL_H
+#define RUXCOIN_QT_WALLETMODEL_H
 
 #include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
@@ -95,7 +95,7 @@ public:
     }
 };
 
-/** Interface to Bitcoin wallet from Qt view code. */
+/** Interface to Ruxcoin wallet from Qt view code. */
 class WalletModel : public QObject
 {
     Q_OBJECT
@@ -200,6 +200,9 @@ public:
     void loadReceiveRequests(std::vector<std::string>& vReceiveRequests);
     bool saveReceiveRequest(const std::string &sAddress, const int64_t nId, const std::string &sRequest);
 
+    bool transactionCanBeAbandoned(uint256 hash) const;
+    bool abandonTransaction(uint256 hash) const;
+
 private:
     CWallet *wallet;
     bool fHaveWatchOnly;
@@ -267,4 +270,4 @@ public Q_SLOTS:
     void pollBalanceChanged();
 };
 
-#endif // BITCOIN_QT_WALLETMODEL_H
+#endif // RUXCOIN_QT_WALLETMODEL_H

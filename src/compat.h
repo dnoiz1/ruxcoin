@@ -1,13 +1,13 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2015 The Bitcoin Core developers
+// Copyright (c) 2009-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_COMPAT_H
-#define BITCOIN_COMPAT_H
+#ifndef RUXCOIN_COMPAT_H
+#define RUXCOIN_COMPAT_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include "config/ruxcoin-config.h"
 #endif
 
 #ifdef WIN32
@@ -78,17 +78,6 @@ typedef u_int SOCKET;
 #define MSG_NOSIGNAL 0
 #endif
 
-#ifndef WIN32
-// PRIO_MAX is not defined on Solaris
-#ifndef PRIO_MAX
-#define PRIO_MAX 20
-#endif
-#define THREAD_PRIORITY_LOWEST          PRIO_MAX
-#define THREAD_PRIORITY_BELOW_NORMAL    2
-#define THREAD_PRIORITY_NORMAL          0
-#define THREAD_PRIORITY_ABOVE_NORMAL    (-2)
-#endif
-
 #if HAVE_DECL_STRNLEN == 0
 size_t strnlen( const char *start, size_t max_len);
 #endif // HAVE_DECL_STRNLEN
@@ -101,4 +90,4 @@ bool static inline IsSelectableSocket(SOCKET s) {
 #endif
 }
 
-#endif // BITCOIN_COMPAT_H
+#endif // RUXCOIN_COMPAT_H

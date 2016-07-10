@@ -1,9 +1,9 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2011-2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_RECEIVECOINSDIALOG_H
-#define BITCOIN_QT_RECEIVECOINSDIALOG_H
+#ifndef RUXCOIN_QT_RECEIVECOINSDIALOG_H
+#define RUXCOIN_QT_RECEIVECOINSDIALOG_H
 
 #include "guiutil.h"
 
@@ -27,7 +27,7 @@ QT_BEGIN_NAMESPACE
 class QModelIndex;
 QT_END_NAMESPACE
 
-/** Dialog for requesting payment of bitcoins */
+/** Dialog for requesting payment of ruxcoins */
 class ReceiveCoinsDialog : public QDialog
 {
     Q_OBJECT
@@ -36,7 +36,7 @@ public:
     enum ColumnWidths {
         DATE_COLUMN_WIDTH = 130,
         LABEL_COLUMN_WIDTH = 120,
-        AMOUNT_MINIMUM_COLUMN_WIDTH = 160,
+        AMOUNT_MINIMUM_COLUMN_WIDTH = 180,
         MINIMUM_COLUMN_WIDTH = 130
     };
 
@@ -76,4 +76,4 @@ private Q_SLOTS:
     void copyAmount();
 };
 
-#endif // BITCOIN_QT_RECEIVECOINSDIALOG_H
+#endif // RUXCOIN_QT_RECEIVECOINSDIALOG_H

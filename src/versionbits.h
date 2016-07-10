@@ -1,9 +1,9 @@
-// Copyright (c) 2016 The Bitcoin Core developers
+// Copyright (c) 2016 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_CONSENSUS_VERSIONBITS
-#define BITCOIN_CONSENSUS_VERSIONBITS
+#ifndef RUXCOIN_CONSENSUS_VERSIONBITS
+#define RUXCOIN_CONSENSUS_VERSIONBITS
 
 #include "chain.h"
 #include <map>
@@ -29,6 +29,15 @@ enum ThresholdState {
 // The map is indexed by the block's parent, however, so all keys in the map
 // will either be NULL or a block with (height + 1) % Period() == 0.
 typedef std::map<const CBlockIndex*, ThresholdState> ThresholdConditionCache;
+
+struct BIP9DeploymentInfo {
+    /** Deployment name */
+    const char *name;
+    /** Whether GBT clients can safely ignore this rule in simplified usage */
+    bool gbt_force;
+};
+
+extern const struct BIP9DeploymentInfo VersionBitsDeploymentInfo[];
 
 /**
  * Abstract class that implements BIP9-style threshold logic, and caches results.

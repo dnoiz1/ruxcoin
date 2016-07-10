@@ -1,9 +1,9 @@
-// Copyright (c) 2015 The Bitcoin Core developers
+// Copyright (c) 2015 The Ruxcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_BENCH_BENCH_H
-#define BITCOIN_BENCH_BENCH_H
+#ifndef RUXCOIN_BENCH_BENCH_H
+#define RUXCOIN_BENCH_BENCH_H
 
 #include <map>
 #include <string>
@@ -40,14 +40,15 @@ namespace benchmark {
         std::string name;
         double maxElapsed;
         double beginTime;
-        double lastTime, minTime, maxTime;
+        double lastTime, minTime, maxTime, countMaskInv;
         int64_t count;
-        int64_t timeCheckCount;
+        int64_t countMask;
     public:
         State(std::string _name, double _maxElapsed) : name(_name), maxElapsed(_maxElapsed), count(0) {
             minTime = std::numeric_limits<double>::max();
             maxTime = std::numeric_limits<double>::min();
-            timeCheckCount = 1;
+            countMask = 1;
+            countMaskInv = 1./(countMask + 1);
         }
         bool KeepRunning();
     };
@@ -69,4 +70,4 @@ namespace benchmark {
 #define BENCHMARK(n) \
     benchmark::BenchRunner BOOST_PP_CAT(bench_, BOOST_PP_CAT(__LINE__, n))(BOOST_PP_STRINGIZE(n), n);
 
-#endif // BITCOIN_BENCH_BENCH_H
+#endif // RUXCOIN_BENCH_BENCH_H
